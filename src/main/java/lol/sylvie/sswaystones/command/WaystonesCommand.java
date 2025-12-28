@@ -29,12 +29,13 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.permissions.PermissionLevel;
 
 public class WaystonesCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal("sswaystones")
-                .requires(source -> Permissions.check(source, "sswaystones.command", false)).executes(context -> {
+                .requires(source -> Permissions.check(source, "sswaystones.command", PermissionLevel.ADMINS)).executes(context -> {
                     String version = FabricLoader.getInstance().getModContainer(Waystones.MOD_ID).orElseThrow()
                             .getMetadata().getVersion().getFriendlyString();
                     context.getSource().sendSuccess(
