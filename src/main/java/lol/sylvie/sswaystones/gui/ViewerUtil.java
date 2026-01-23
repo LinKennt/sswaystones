@@ -4,6 +4,8 @@
 */
 package lol.sylvie.sswaystones.gui;
 
+import java.util.HashSet;
+import java.util.UUID;
 import lol.sylvie.sswaystones.Waystones;
 import lol.sylvie.sswaystones.gui.compat.FloodgateCompat;
 import lol.sylvie.sswaystones.storage.WaystoneRecord;
@@ -14,6 +16,8 @@ import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 public class ViewerUtil {
+    public static HashSet<UUID> mayAccessAll = new HashSet<>();
+
     public static void openGui(ServerPlayer player, @Nullable WaystoneRecord record) {
         if (Waystones.isInCombat(player)) {
             player.displayClientMessage(

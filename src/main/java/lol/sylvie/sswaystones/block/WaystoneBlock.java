@@ -106,13 +106,6 @@ public class WaystoneBlock extends BaseEntityBlock implements PolymerBlock {
     }
 
     @Override
-    public BlockState playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
-        if (!world.isClientSide())
-            onRemoved(world, pos);
-        return super.playerWillDestroy(world, pos, state, player);
-    }
-
-    @Override
     protected float getDestroyProgress(BlockState state, Player player, BlockGetter world, BlockPos pos) {
         WaystoneRecord record = getWaystone(pos, (ServerLevel) world);
         if (record == null || Permissions.check(player, "sswaystones.create.server", 4)) {
@@ -135,14 +128,16 @@ public class WaystoneBlock extends BaseEntityBlock implements PolymerBlock {
             String waystoneHash = HashUtil.getHash(pos, world.dimension());
             WaystoneRecord record = storage.getWaystone(waystoneHash);
 
+            boolean newlyCreated = false;
             if (record == null) {
                 WaystoneRecord newWaystone = createWaystone(pos, world, serverPlayer);
                 if (newWaystone == null)
                     return InteractionResult.FAIL;
                 record = newWaystone;
+                newlyCreated = true;
             }
 
-            if (!playerData.discoveredWaystones.contains(waystoneHash)) {
+            if (!playerData.discoveredWaystones.contains(waystoneHash) || newlyCreated) {
                 playerData.discoveredWaystones.add(waystoneHash);
                 player.displayClientMessage(Component
                         .translatable("message.sswaystones.discovered",

@@ -10,8 +10,13 @@ import lol.sylvie.sswaystones.block.ModBlocks;
 import lol.sylvie.sswaystones.command.WaystonesCommand;
 import lol.sylvie.sswaystones.config.Configuration;
 import lol.sylvie.sswaystones.item.ModItems;
+import lol.sylvie.sswaystones.worldgen.VillageInjector;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
+import net.fabricmc.fabric.api.resource.v1.pack.PackActivationType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
@@ -37,6 +42,10 @@ public class Waystones implements ModInitializer {
 
         CommandRegistrationCallback.EVENT
                 .register((dispatcher, registryAccess, environment) -> WaystonesCommand.register(dispatcher));
+
+        ServerLifecycleEvents.SERVER_STARTING.register(VillageInjector::inject);
+        ResourceLoader.registerBuiltinPack(Waystones.id("remove_waystone_recipes"),
+                FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow(), PackActivationType.NORMAL);
     }
 
     public static Identifier id(String name) {

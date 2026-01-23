@@ -12,16 +12,15 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import lol.sylvie.sswaystones.Waystones;
 import lol.sylvie.sswaystones.block.ModBlocks;
 import lol.sylvie.sswaystones.config.Configuration;
 import lol.sylvie.sswaystones.config.Description;
+import lol.sylvie.sswaystones.gui.ViewerUtil;
 import lol.sylvie.sswaystones.storage.WaystoneRecord;
 import lol.sylvie.sswaystones.storage.WaystoneStorage;
+import lol.sylvie.sswaystones.util.NameGenerator;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
@@ -29,6 +28,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.PermissionLevel;
 
 public class WaystonesCommand {
@@ -82,7 +82,27 @@ public class WaystonesCommand {
                             () -> Component.translatable("command.sswaystones.waystone_removed_successfully"), true);
 
                     return 1;
-                }))).then(literal("config").then(literal("help").executes(context -> {
+                })))
+                .then(literal("showall")
+                        .requires(source -> Permissions.check(source, "sswaystones.showall", PermissionLevel.ADMINS))
+                        .executes(context -> {
+                            ServerPlayer player = context.getSource().getPlayerOrException();
+                            UUID uuid = player.getUUID();
+                            if (ViewerUtil.mayAccessAll.contains(uuid)) {
+                                ViewerUtil.mayAccessAll.remove(uuid);
+                                context.getSource().sendSuccess(() -> Component
+                                        .translatable("command.sswaystones.showall_off").withStyle(ChatFormatting.RED),
+                                        true);
+                            } else {
+                                ViewerUtil.mayAccessAll.add(uuid);
+                                context.getSource().sendSuccess(() -> Component
+                                        .translatable("command.sswaystones.showall_on").withStyle(ChatFormatting.GREEN),
+                                        true);
+                            }
+
+                            return 1;
+                        }))
+                .then(literal("config").then(literal("help").executes(context -> {
                     context.getSource()
                             .sendSuccess(() -> Component.translatable("command.sswaystones.config_help_header"), false);
                     for (Map.Entry<String, Component> option : getConfigOptions().entrySet()) {
@@ -135,6 +155,9 @@ public class WaystonesCommand {
                                         CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedInt(),
                                         Component.translatable("command.sswaystones.config_set_invalid_type"));
                             }
+
+                            NameGenerator.reloadFiles();
+
                             context.getSource()
                                     .sendSuccess(() -> Component.translatable("command.sswaystones.config_set_success",
                                             formatKey(key), formatValue(newValue)), true);

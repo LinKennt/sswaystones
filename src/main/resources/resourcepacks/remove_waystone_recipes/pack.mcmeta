@@ -1,7 +1,8 @@
 {
   "pack": {
-    "pack_format": 94.1,
-    "description": "Remove all Server-Side Waystones recipes"
+    "description": "Remove all Server-Side Waystones recipes",
+    "min_format": 94.1,
+    "max_format": 97.1
   },
   "filter": {
     "block": [

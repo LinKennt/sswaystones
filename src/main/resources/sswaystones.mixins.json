@@ -4,7 +4,10 @@
   "package": "lol.sylvie.sswaystones.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "PlayerEntityMixin"
+    "JigsawPlacerMixin",
+    "LevelChunkMixin",
+    "PlayerMixin",
+    "StructureTemplatePoolAccessor"
   ],
   "client": [
   ],

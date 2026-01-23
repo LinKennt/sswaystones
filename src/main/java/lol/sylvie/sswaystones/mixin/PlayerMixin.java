@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Player.class)
-public class PlayerEntityMixin {
+public class PlayerMixin {
     @Unique
     private static boolean isCombat(DamageSource source) {
         Entity entity = source.getEntity();
@@ -31,7 +31,7 @@ public class PlayerEntityMixin {
     }
 
     @Inject(method = "hurtServer", at = @At("TAIL"))
-    public void updateCombatTimer(ServerLevel world, DamageSource source, float amount,
+    public void sswaystones$updateCombatTimer(ServerLevel world, DamageSource source, float amount,
             CallbackInfoReturnable<Boolean> cir) {
         Player thisPlayer = (Player) (Object) this;
         if (thisPlayer.equals(source.getEntity()) || !isCombat(source))

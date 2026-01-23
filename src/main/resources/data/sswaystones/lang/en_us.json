@@ -37,6 +37,8 @@
   "command.sswaystones.waystone_not_found": "That waystone does not exist!",
   "command.sswaystones.waystone_removed_successfully": "Waystone was removed!",
   "command.sswaystones.list_header": "§b§eList of Waystones:",
+  "command.sswaystones.showall_on": "You may now access all waystones!",
+  "command.sswaystones.showall_off": "You can no longer access all waystones!",
   "command.sswaystones.config_reload_success": "Reloaded configuration from disk!",
   "command.sswaystones.config_save_success": "Saved configuration to disk!",
   "command.sswaystones.config_help_header": "§b§eConfiguration Options:",
@@ -52,5 +54,7 @@
   "config.sswaystones.combat_cooldown": "Disallows using waystones for a configurable amount of time after being hit.",
   "config.sswaystones.pve_combat": "Whether the combat cooldown should apply when non-player mobs attack the player.",
   "config.sswaystones.waystone_limit": "The maximum number of waystones a player can have. (0 for unlimited)",
-  "config.sswaystones.physical_icon_display": "Changes the Eye of Ender above each waystone to the icon it has."
+  "config.sswaystones.physical_icon_display": "Changes the Eye of Ender above each waystone to the icon it has.",
+  "config.sswaystones.random_name_language": "The language of randomly generated waystone names, in language code. (en_us by default)",
+  "config.sswaystones.village_structures": "Add waystone structures inside of villages (applies on restart)"
 }

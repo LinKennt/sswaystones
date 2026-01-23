@@ -11,6 +11,7 @@ import com.google.gson.annotations.SerializedName;
 import java.io.*;
 import java.nio.file.Path;
 import lol.sylvie.sswaystones.Waystones;
+import lol.sylvie.sswaystones.util.NameGenerator;
 import net.fabricmc.loader.api.FabricLoader;
 
 public class Configuration {
@@ -42,6 +43,8 @@ public class Configuration {
             Instance loaded = GSON.fromJson(reader, Instance.class);
             if (loaded != null)
                 instance = loaded;
+
+            NameGenerator.reloadFiles();
         } catch (IOException exception) {
             Waystones.LOGGER.warn("Could not load configuration from disk!", exception);
         } catch (JsonSyntaxException exception) {
@@ -82,5 +85,13 @@ public class Configuration {
         @SerializedName("physical_icon_display")
         @Description(translation = "config.sswaystones.physical_icon_display")
         public boolean physicalIconDisplay = false;
+
+        @SerializedName("random_name_language")
+        @Description(translation = "config.sswaystones.random_name_language")
+        public String randomGeneratedNameLanguage = "en_us";
+
+        @SerializedName("village_structures")
+        @Description(translation = "config.sswaystones.village_structures")
+        public boolean injectVillageStructures = true;
     }
 }

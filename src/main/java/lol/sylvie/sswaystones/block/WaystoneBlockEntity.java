@@ -18,6 +18,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Display;
@@ -55,6 +57,12 @@ public class WaystoneBlockEntity extends BlockEntity {
             waystoneEntity.createHologramDisplay(world);
         }
 
+        // Eye rotation
+        // We use game time instead of just adding yaw because the display is recreated
+        // when a waystone is discovered
+        // and it would reset jarringly if it wasn't separate from the display objects
+        waystoneEntity.eyeDisplay.setYaw(((world.getGameTime() + waystoneEntity.hashCode()) % 90) * 4);
+
         ChatFormatting color = ChatFormatting.RESET;
         if (waystoneOwned) {
             // Team coloring
@@ -66,33 +74,29 @@ public class WaystoneBlockEntity extends BlockEntity {
                 }
             }
 
-            if (waystoneEntity.nameDisplay != null) {
-                waystoneEntity.nameDisplay.setText(record.getWaystoneText().copy().withStyle(color));
-            }
-
             // TODO: Maybe cache this value?
             waystoneEntity.eyeDisplay.setItem(getDisplayIcon(world.getServer(), record));
-        }
 
-        // Eye rotation
-        waystoneEntity.eyeDisplay.setYaw(waystoneEntity.eyeDisplay.getYaw() + 4f);
+            if (waystoneEntity.nameDisplay == null)
+                return;
+
+            waystoneEntity.nameDisplay.setText(record.getWaystoneText().copy().withStyle(color));
+
+            // Bob up and down
+            double y = (Math.sin((double) System.currentTimeMillis() / 1000) / 32) + 1.55d;
+            waystoneEntity.nameDisplay.setOffset(new Vec3(0, y, 0));
+        }
 
         // Particles
-        if (RANDOM.nextInt(0, 20) == 0 && world instanceof ServerLevel serverWorld) {
-            Vec3 pos = waystoneEntity.getBlockPos().offset(0, 1, 0).getCenter();
+        if (RANDOM.nextInt(0, waystoneOwned ? 20 : 10) == 0 && world instanceof ServerLevel serverWorld) {
+            Vec3 pos = waystoneEntity.getBlockPos().getBottomCenter().add(0, 1, 0);
             Integer colorValue = color.getColor();
-            serverWorld.sendParticles(
-                    new DustParticleOptions(
-                            color == ChatFormatting.RESET || colorValue == null ? Color.RED.getRGB() : colorValue, 1f),
-                    pos.x(), pos.y(), pos.z(), 8, 0.1d, 0.1d, 0.1d, 0.1d);
+
+            boolean noTeam = color == ChatFormatting.RESET || colorValue == null;
+            ParticleOptions options = noTeam ? ParticleTypes.PORTAL : new DustParticleOptions(colorValue, 1f);
+
+            serverWorld.sendParticles(options, pos.x(), pos.y(), pos.z(), 8, 0.1d, 0.1d, 0.1d, 0.1d);
         }
-
-        if (waystoneEntity.nameDisplay == null)
-            return;
-
-        // Bob up and down
-        double y = (Math.sin((double) System.currentTimeMillis() / 1000) / 32) + 1.55d;
-        waystoneEntity.nameDisplay.setOffset(new Vec3(0, y, 0));
     }
 
     private @Nullable WaystoneRecord getThisWaystone(Level world) {
@@ -111,29 +115,40 @@ public class WaystoneBlockEntity extends BlockEntity {
     }
 
     public static ItemStack getDisplayIcon(MinecraftServer server, @Nullable WaystoneRecord record) {
-        return Waystones.configuration.getInstance().physicalIconDisplay && record != null
+        ItemStack iconStack = Waystones.configuration.getInstance().physicalIconDisplay && record != null
                 ? record.getIconOrHead(server)
                 : Items.ENDER_EYE.getDefaultInstance();
+        iconStack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
+        return iconStack;
+    }
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        super.preRemoveSideEffects(pos, state);
+        if (level != null)
+            WaystoneBlock.onRemoved(level, pos);
     }
 
     public void createHologramDisplay(Level world) {
         this.removeDisplay();
 
         WaystoneRecord record = getThisWaystone(world);
+        boolean exists = record != null;
 
         // Eye display
-        ItemStack stack = getDisplayIcon(world.getServer(), record);
+        ItemStack glowingEnderPearl = Items.ENDER_PEARL.getDefaultInstance();
+        glowingEnderPearl.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
 
-        stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
+        ItemStack stack = exists ? getDisplayIcon(world.getServer(), record) : glowingEnderPearl;
         eyeDisplay = new ItemDisplayElement(stack);
         eyeDisplay.setOffset(new Vec3(0, 1.125, 0));
         eyeDisplay.setScale(new Vector3f(0.75f, 0.75f, 0.75f));
-        eyeDisplay.setInterpolationDuration(2);
+        eyeDisplay.setInterpolationDuration(1);
 
         holder.addElement(eyeDisplay);
 
         // Waystone name display
-        if (record != null) {
+        if (exists) {
             nameDisplay = new TextDisplayElement();
 
             nameDisplay.setText(record.getWaystoneText());

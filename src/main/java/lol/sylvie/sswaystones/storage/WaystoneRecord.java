@@ -17,6 +17,7 @@ import java.util.UUID;
 import lol.sylvie.sswaystones.Waystones;
 import lol.sylvie.sswaystones.block.WaystoneBlock;
 import lol.sylvie.sswaystones.config.Configuration;
+import lol.sylvie.sswaystones.gui.ViewerUtil;
 import lol.sylvie.sswaystones.util.HashUtil;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.ChatFormatting;
@@ -32,6 +33,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
@@ -272,14 +274,17 @@ public final class WaystoneRecord {
         }
 
         public boolean canPlayerAccess(WaystoneRecord parent, ServerPlayer player) {
+            if (ViewerUtil.mayAccessAll.contains(player.getUUID())
+                    && Permissions.check(player, "sswaystones.showall", PermissionLevel.ADMINS))
+                return true;
+
             PlayerData data = WaystoneStorage.getPlayerState(player);
             if (data.discoveredWaystones.contains(parent.getHash()))
                 return true;
 
-            if (this.isGlobal())
+            if (this.isGlobal() || this.isServerOwned())
                 return true;
-            if (this.isServerOwned())
-                return true;
+
             PlayerTeam team = player.getTeam();
             if (team != null && team.getName().equals(this.team))
                 return true;
