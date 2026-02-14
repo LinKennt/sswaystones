@@ -39,7 +39,7 @@
   "command.sswaystones.list_header": "§b§eСписок путеводных камней:",
   "command.sswaystones.showall_on": "Теперь вы можете получить доступ ко всем путеводным камням!",
   "command.sswaystones.showall_off": "Вы больше не можете получить доступ ко всем путеводным камням!",
-  "command.sswaystones.config_reload_success": "Конфигурация перезагруженас диска!",
+  "command.sswaystones.config_reload_success": "Конфигурация перезагружена с диска!",
   "command.sswaystones.config_save_success": "Конфигурация сохранена на диск!",
   "command.sswaystones.config_help_header": "§b§eПараметры конфигурации:",
   "command.sswaystones.config_format": "%s §7= %s",
